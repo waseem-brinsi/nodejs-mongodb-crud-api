@@ -12,8 +12,9 @@ router.post('/signup',authController.signup)
 router.post('/login',authController.login)
 
 //sending link with token to restpassword 
-router.post('/forgetPassword',authController.forgetPassword)
+router.post('/forgotPassword',authController.forgotPassword)
 router.patch('/restPassword/:RestToken',authController.restPassword)
+router.patch('/resetcode/:ResetCode',authController.resetCode)
 
 //update login_user password 
 router.route('/updatePassword')

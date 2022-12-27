@@ -12,13 +12,13 @@ const filterObj = function(obj,...allowedFields){
 
 exports.getalluser = async (req,res)=>{
     try{
-        const alluser = await user.find()    
+        param =req.query
+        const alluser = await user.find(param)    
         res.status(200).json(
-        {
-            status:alluser.length,
+            //status:alluser.length,
             alluser
-        }
-    )}catch(err){
+        )
+        }catch(err){
         res.status(500).json({status:'faild',error:err})
     }
 }

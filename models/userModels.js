@@ -4,34 +4,27 @@ const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
 
 const userschema = new mongoose.Schema({
-    name:{
-        type:String,
+    name:{type:String,
         required:[true,'user must have name']
     },
-    email:{
-        type:String,
+    email:{type:String,
         required:[true,'user must have email'],
         unique:true,
         lowercase:true,
         validate:[validator.isEmail,'invalid email']
     },
-    photo:{
-        type:String
-    },
-    role:{
-        type: String,
-        required:true,
+    phone:{type:String},
+    photo:{type:String},
+    role:{type: String,
         enum: ['user','admin','guide','lead_guide'],
         default: 'user'
     },
-    password:{
-        type:String,
+    password:{type:String,
         required:[true,'user must have password'],
         minlength:8,
         select:false
     },
-    passwordConfirm:{
-        type:String,
+    passwordConfirm:{type:String,
         required:[true,'user must have password comfirmation'],
         validate:{
             validator:function(el){
@@ -43,8 +36,9 @@ const userschema = new mongoose.Schema({
     PasswordchangedAt:{type:Date},
     PasswordRestToken:{type:String},
     PasswordRestExpire:{type:Date},
-    active:{
-        type:Boolean,
+    ResetCode:{type:String},
+    ResetCodeExpire:{type:Date},
+    active:{type:Boolean,
         default:true,
         select:false,
     }
@@ -80,14 +74,17 @@ userschema.methods.isPasschanged =  function(tokenIat){
 }
 userschema.methods.createPasswordRestToken = function(){
     const restToken = crypto.randomBytes(32).toString('hex');
-    this.PasswordRestToken= crypto
-        .createHash('sha256')
-        .update(restToken)
-        .digest('hex');
-
+    this.PasswordRestToken= crypto.createHash('sha256').update(restToken).digest('hex');
     this.PasswordRestExpire = Date.now() + 10 * 60 * 1000;
     console.log(restToken,this.PasswordRestToken);
-    return restToken
+    return restToken 
+}
+userschema.methods.generateCodeReset = function(){
+    const ResetCode = crypto.randomBytes(3).toString('hex');
+    this.ResetCode = crypto.createHash('sha256').update(ResetCode).digest('hex');
+    this.ResetCodeExpire = Date.now() + 10 * 60 * 1000;
+    console.log(ResetCode,this.ResetCode)
+    return ResetCode
 }
 const user = mongoose.model('user',userschema)
 

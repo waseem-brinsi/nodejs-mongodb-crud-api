@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken')
 const sendEmail = require('./../utils/email')
 const crypto = require('crypto')
 
-
 const signToken = function(id){
     return jwt.sign({id},'wetcci-secret',{
         expiresIn:'90d'
@@ -52,17 +51,15 @@ exports.signup = async (req,res)=>{
             email:req.body.email,
             password:req.body.password,
             passwordConfirm:req.body.passwordConfirm,
+            phone:req.body.phone,
             changedAt:req.body.changedAt
-        });
+        })
 
         const token = signToken(newUser._id)
-
         res.status(200).json({
             status:"seccuss",
             token:token,
-            data:{
-                newUser
-            }
+            data:newUser
         })
     }catch(err){
         res.status(400).json(
@@ -126,7 +123,7 @@ exports.restrictTo =  function(...roles){
     }
 }
 
-exports.forgetPassword =async function(req,res,next){
+exports.forgotPassword =async function(req,res,next){
 
     // 1) get random user based on Post email:
     console.log("Find the email if exist");
@@ -142,20 +139,23 @@ exports.forgetPassword =async function(req,res,next){
     
     // 2) generate the random reset token:
     console.log("...Generate random token...");
+    const CodeReset = currentuser.generateCodeReset()
     const RestToken = currentuser.createPasswordRestToken()
     await currentuser.save({validateBeforeSave: false})
 
     // 3) Send it to user's email:
-    console.log("...Send it to the mail...");
+    console.log("...Send it to the mail...")
     resetURL=`${req.protocol}://${req.get('host')}/api/v1/users/restPassword/${RestToken}`
-    const message = `click the link to reset your password => ${resetURL}`
+    const message = `
+    Reset Code for Mobile ${CodeReset}
+    click the link to reset your password => ${resetURL}`
     try{
     await sendEmail({
         email:  currentuser.email,
         subject:'password reset token',
         message,
     });
-    res.status(400).json({
+    res.status(200).json({
         status:"success",
         message:"email send"
     })
@@ -170,8 +170,8 @@ exports.forgetPassword =async function(req,res,next){
 }
 
 exports.restPassword = async function(req,res,next){ 
-    // 1) get user based on the token
 
+    // 1) get user based on the token
     RestToken = req.params.RestToken
     console.log(RestToken);
     PasswordRestToken = crypto.createHash('sha256').update(RestToken).digest('hex');
@@ -186,26 +186,64 @@ exports.restPassword = async function(req,res,next){
         })
     }
     console.log(currentuser);
+    console.log("level 1");
     // 2) if token has not exprired, and there is user, set the new password
-    
     currentuser.password = req.body.newPassword ;
     currentuser.passwordConfirm = req.body.confirmNewPassword;
     currentuser.PasswordRestExpire = undefined;
     currentuser.PasswordRestToken = undefined;
-
-
+    console.log("level 2");
     await currentuser.save({validateBeforeSave: false});
-
     // 3) Update changePasswordAt field properly for the user
     // 4) Log the user in , send JWT
     const token = signToken(currentuser._id)
-
     res.status(200).json({
         status:"success",
         token
     })
 }
 
+exports.resetCode = async function(req,res,next){
+    try {
+        
+        // 1) get user based on the ResetCode
+        ResetCode = req.params.ResetCode
+        console.log(ResetCode);
+        ResetCode = crypto.createHash('sha256').update(ResetCode).digest('hex');
+        console.log(ResetCode);
+        const currentuser = await user.findOne({
+            ResetCode:ResetCode,
+            ResetCodeExpire:{$gt:Date.now()}
+        })
+        if(!currentuser){
+            console.log(currentuser);
+            res.status(200).json({
+                error:"ResetCode is invalid or has expired"
+            })
+        }
+        console.log(currentuser);
+        console.log("level 1");
+
+        // 2) if ResetCode has not exprired, and there is user, set the new password
+        currentuser.password = req.body.password ;
+        currentuser.passwordConfirm = req.body.passwordConfirm;
+        currentuser.PasswordRestExpire = undefined;
+        currentuser.PasswordRestToken = undefined;
+        console.log("level 2");
+        await currentuser.save({validateBeforeSave: false});
+
+        // 3) Update changePasswordAt field properly for the user
+        // 4) Log the user in , send JWT
+        const token = signToken(currentuser._id)
+        res.status(200).json({
+            status:"success",
+            token
+        })
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 exports.updatePassword = async function(req,res,next){
     // 1) get user from collection
