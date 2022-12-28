@@ -2,7 +2,7 @@ const express = require("express");
 const app = express();
 const morgan = require('morgan');
 
-const tourRoute = require('./routes/tourRoutes');
+const placeRoute = require('./routes/placeRoutes');
 const userRoute = require('./routes/userRoutes');
 
 //===============| MiddelWare |=================//
@@ -13,11 +13,12 @@ app.use((req,res,next)=>{
 app.use(morgan('dev'));
 app.use(express.json());
 
+app.use("/img",express.static('dev-data/img'))
 
 //=============================================//
 
 
-app.use('/api/v1/tours',tourRoute);
+app.use('/api/v1/places',placeRoute);
 app.use('/api/v1/users',userRoute)
 
 module.exports = app

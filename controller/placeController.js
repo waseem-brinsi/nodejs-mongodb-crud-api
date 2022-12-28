@@ -1,7 +1,7 @@
-const tour = require('./../models/tourModels')
+const place = require('../models/placeModels')
 
 
-exports.getalltours = async (req,res)=>{
+exports.getallplaces = async (req,res)=>{
     try{
         //deleting unused param
         let objectquery = {...req.query}
@@ -14,7 +14,7 @@ exports.getalltours = async (req,res)=>{
         console.log(objectquery);
         objectquery = JSON.parse(objectquery)
 
-        let query =  tour.find(objectquery)
+        let query =  place.find(objectquery)
 
         //3) sort
         if(req.query.sort){
@@ -43,15 +43,9 @@ exports.getalltours = async (req,res)=>{
         }
 
 
-        const tours = await query
+        const places = await query
 
-        res.status(200).json({
-            resault:tours.length,
-            status:"seccuss",
-            data:{
-                tours
-            }
-        })
+        res.status(200).json( places)
     }catch(err){
         res.status(200)
         .json({
@@ -59,14 +53,14 @@ exports.getalltours = async (req,res)=>{
             error:err
         })}
 }
-exports.createtour = async (req,res)=>{
+exports.createplace = async (req,res)=>{
     try{
-        const newtour = await tour.create(req.body)
+        const newplace = await place.create(req.body)
         res.status(200).json(
             {
                 status:"seccuss",
                 data:{
-                    newtour
+                    newplace
                 }
             }
         )
@@ -82,13 +76,13 @@ exports.createtour = async (req,res)=>{
 
 
 }
-exports.gettour = async (req,res)=>{
+exports.getplace = async (req,res)=>{
     try{
-        const findtour =await  tour.findById(req.params.id) 
-        // const findtour =await  tour.findOne({_id:req.params.id}) 
+        const findplace =await  place.findById(req.params.id) 
+        // const findplace =await  place.findOne({_id:req.params.id}) 
         res.status(200).json({
         status:"seccuss",
-        data:findtour
+        data:findplace
     });
     }catch(err){
         res.status(400).json(
@@ -99,14 +93,14 @@ exports.gettour = async (req,res)=>{
         )
     }
 }
-exports.updateTour = async (req,res)=>{
+exports.updateplace = async (req,res)=>{
     try{
-        const updatetour = await tour.findByIdAndUpdate(req.params.id,req.body,{
+        const updateplace = await place.findByIdAndUpdate(req.params.id,req.body,{
                                                                                 new:true,
                                                                                 runValidators:true    })
         res.status(200).json({
             
-            data:updatetour
+            data:updateplace
         });
     }catch(err){
         res.status(404).json(
@@ -117,9 +111,9 @@ exports.updateTour = async (req,res)=>{
         )
     }
 }
-exports.deleteTour =async (req,res)=>{
+exports.deleteplace =async (req,res)=>{
     try{
-        await tour.findByIdAndDelete(req.params.id)
+        await place.findByIdAndDelete(req.params.id)
         res.status(200).json({
             status:"seccuss",
             data:null

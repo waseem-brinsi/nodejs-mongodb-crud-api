@@ -1,7 +1,7 @@
 const app = require('./app')
 
 
-const tour = require('./models/tourModels')
+const tour = require('./models/placeModels')
 const mongoose = require('mongoose')
 
 

@@ -9,8 +9,9 @@ const userschema = new mongoose.Schema({
     },
     email:{type:String,
         required:[true,'user must have email'],
-        unique:true,
+        trim:true,
         lowercase:true,
+        unique:true,
         validate:[validator.isEmail,'invalid email']
     },
     phone:{type:String},
@@ -21,11 +22,15 @@ const userschema = new mongoose.Schema({
     },
     password:{type:String,
         required:[true,'user must have password'],
+        trim:true,
+        lowercase:true,
         minlength:8,
         select:false
     },
     passwordConfirm:{type:String,
         required:[true,'user must have password comfirmation'],
+        trim:true,
+        lowercase:true,
         validate:{
             validator:function(el){
                 return el === this.password

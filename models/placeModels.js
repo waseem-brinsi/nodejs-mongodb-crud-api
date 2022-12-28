@@ -1,5 +1,38 @@
 const mongoose = require('mongoose')
 
+const placeschema = new mongoose.Schema({
+    name:{
+        type:String,
+        require:[true,'A place must have name'],
+        unique: true,
+        trim:true
+    },
+    description:{
+        type:String,
+        required:[true,'a place must have description'],
+        trim:true
+    },
+    rating:{
+        type:Number,
+        default:0.0
+    },
+    image:{
+        type:String,
+        required:[true,'a place must have description']
+    }
+});
+place = mongoose.model('place',placeschema)
+module.exports = place
+
+
+
+
+
+
+
+/*
+const mongoose = require('mongoose')
+
 const tourschema = new mongoose.Schema({
     name:{
         type:String,
@@ -61,3 +94,5 @@ const tourschema = new mongoose.Schema({
 tour = mongoose.model('tour',tourschema)
 
 module.exports = tour
+
+*/
