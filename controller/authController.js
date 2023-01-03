@@ -30,7 +30,8 @@ exports.login = async function(req,res,next){
             const token = signToken(fuser._id);
             res.status(200).json({
                 email:fuser.email,
-                token:token
+                token:token,
+                fuser
             })
         }
         else{
@@ -46,6 +47,7 @@ exports.login = async function(req,res,next){
 exports.signup = async (req,res)=>{
     try{
         const newUser = await user.create({
+            photo:req.body.photo,
             name:req.body.name,
             role:req.body.role,
             email:req.body.email,
@@ -169,6 +171,7 @@ exports.forgotPassword =async function(req,res,next){
 
 }
 
+
 exports.restPassword = async function(req,res,next){ 
 
     // 1) get user based on the token
@@ -202,6 +205,7 @@ exports.restPassword = async function(req,res,next){
         token
     })
 }
+
 
 exports.resetCode = async function(req,res,next){
     try {
@@ -267,4 +271,3 @@ exports.updatePassword = async function(req,res,next){
     sendToken(currentUser,200,res)
     next()
 }
-

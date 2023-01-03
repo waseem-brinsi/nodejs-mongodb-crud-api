@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs')
 const crypto = require('crypto')
 
 const userschema = new mongoose.Schema({
+    photo:{type:String},
     name:{type:String,
         required:[true,'user must have name']
     },
@@ -15,7 +16,7 @@ const userschema = new mongoose.Schema({
         validate:[validator.isEmail,'invalid email']
     },
     phone:{type:String},
-    photo:{type:String},
+
     role:{type: String,
         enum: ['user','admin','guide','lead_guide'],
         default: 'user'

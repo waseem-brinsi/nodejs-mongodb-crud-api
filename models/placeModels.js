@@ -13,8 +13,8 @@ const placeschema = new mongoose.Schema({
         trim:true
     },
     rating:{
-        type:Number,
-        default:0.0
+        type:String,
+        default:"0.0"
     },
     image:{
         type:String,

@@ -56,14 +56,7 @@ exports.getallplaces = async (req,res)=>{
 exports.createplace = async (req,res)=>{
     try{
         const newplace = await place.create(req.body)
-        res.status(200).json(
-            {
-                status:"seccuss",
-                data:{
-                    newplace
-                }
-            }
-        )
+        res.status(200).json(newplace)
     }catch(err){
         res.status(400).json(
             {
@@ -72,9 +65,6 @@ exports.createplace = async (req,res)=>{
             }
         )
     }
-
-
-
 }
 exports.getplace = async (req,res)=>{
     try{

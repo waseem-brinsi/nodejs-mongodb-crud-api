@@ -19,5 +19,5 @@ router
         authController.protect,
         authController.restrictTo("admin"),
         placeController.deleteplace)
-    
+        
 module.exports = router;

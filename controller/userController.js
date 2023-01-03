@@ -23,6 +23,7 @@ exports.getalluser = async (req,res)=>{
     }
 }
 
+
 exports.createuser = (req,res)=>{
     res.status(500).json(
         {
@@ -31,6 +32,7 @@ exports.createuser = (req,res)=>{
         }
     )
 }
+
 
 exports.getuser = (req,res)=>{
     res.status(500).json(
@@ -68,7 +70,7 @@ exports.updateMe =async function(req,res){
                 message:"you can't update your password use /updatePassword"
             })
         }
-    
+
         // 2) update user document
         const filteredBody = filterObj(req.body,["name","email"])
         const updateUser = await user.findByIdAndUpdate(req.user.id,filteredBody,{new:true,runValidators:true})
