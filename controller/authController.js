@@ -2,13 +2,13 @@ const user = require('./../models/userModels')
 const jwt = require('jsonwebtoken')
 const sendEmail = require('./../utils/email')
 const crypto = require('crypto')
+const bcrypt = require('bcrypt')
 
 const signToken = function(id){
     return jwt.sign({id},'wetcci-secret',{
         expiresIn:'90d'
     })
 }
-
 const sendToken = function(user,status,res){
     const token = signToken(user._id);
     res.status(status).json({
@@ -24,9 +24,16 @@ exports.login = async function(req,res,next){
         if(!email || !password ){
            return res.status(400).json({status:"faild",error:"empty passwor and email"})
         }
+        console.log("level 1 ");
        const fuser = await user.findOne({email}).select('+password')
+       console.log("level 2 ");
        const comparPassword = await fuser.comparPassword(password,fuser.password)
+       console.log("level 3 ");
+       const hashedPass = await bcrypt.hash(password,12)
+       console.log(password+":"+hashedPass+"---"+fuser.password);
+       console.log(comparPassword);
         if(fuser && comparPassword){
+            console.log("level 4 ");
             const token = signToken(fuser._id);
             res.status(200).json({
                 email:fuser.email,
@@ -40,22 +47,15 @@ exports.login = async function(req,res,next){
        }
        catch(err){
         console.log(err)
-        return res.status(400).json({status:"faild",error:"incorrect email or password"})
+        return res.status(400).json({status:"faild",error:"unknown error"})
        }
 }
 
 exports.signup = async (req,res)=>{
     try{
-        const newUser = await user.create({
-            photo:req.body.photo,
-            name:req.body.name,
-            role:req.body.role,
-            email:req.body.email,
-            password:req.body.password,
-            passwordConfirm:req.body.passwordConfirm,
-            phone:req.body.phone,
-            changedAt:req.body.changedAt
-        })
+        const newUser = await user.create(
+            req.body
+        )
 
         const token = signToken(newUser._id)
         res.status(200).json({
@@ -71,7 +71,6 @@ exports.signup = async (req,res)=>{
             }
         )
     }
-
 }
 
 //check if the user login and have token

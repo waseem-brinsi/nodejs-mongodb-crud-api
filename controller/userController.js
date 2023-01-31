@@ -23,6 +23,21 @@ exports.getalluser = async (req,res)=>{
     }
 }
 
+exports.getalluser = async (req,res)=>{
+    try{
+        console.log('level 0');
+        param =req.query
+        console.log('level 1');
+        const alluser = await user.find(param)    
+        console.log('level 2');
+        res.status(200).json(
+            //status:alluser.length,
+            alluser
+        )
+        }catch(err){
+        res.status(500).json({status:'faild',error:err})
+    }
+}
 
 exports.createuser = (req,res)=>{
     res.status(500).json(

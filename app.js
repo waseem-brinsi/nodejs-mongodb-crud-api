@@ -16,7 +16,7 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use("/img",express.static('dev-data/img'))
 
-//===============| Upload Image |=================//
+//=======================================| Upload Image |=================================================================//
 const storage = multer.diskStorage({
     destination: 'dev-data/img',
     filename: function (req, file, cb) {
@@ -35,7 +35,7 @@ app.post('/api/v1/upload', upload.single('image'), (req, res) => {
         }
     )
 });
-//=============================================//
+//=====================================================================================================================//
 
 
 app.use('/api/v1/hotels',hotelRoute)

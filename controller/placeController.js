@@ -3,49 +3,9 @@ const place = require('../models/placeModels')
 
 exports.getallplaces = async (req,res)=>{
     try{
-        //deleting unused param
-        let objectquery = {...req.query}
-        const deletedElement = ['page','sort','limit','fields']
-        deletedElement.forEach((el)=>{delete objectquery[el]})
-        //replacing gte with $gte
-        objectquery = JSON.stringify(objectquery)
-        objectquery= objectquery.replace(/\b(gte|lte)\b/g,match=>`$${match}`);
-        console.log(req.query);
-        console.log(objectquery);
-        objectquery = JSON.parse(objectquery)
-
-        let query =  place.find(objectquery)
-
-        //3) sort
-        if(req.query.sort){
-            sort = req.query.sort.split(',').join(' ')
-            query.sort(sort)
-        }
-        else{
-            query.sort("id")
-        }
-        // .where('duration').gte(duration_gte)
-        // .where('difficulty').equals('easy')
-        // .where('price').lte(price_gte)
-
-        //4)select by fields
-        console.log(req.query);
-        if(req.query.fields){        
-            const fields = req.query.fields.split(',').join(' ')
-            query.select(fields)
-        }
-        //5) pagination
-        if(req.query.page){
-            page = Number(req.query.page);
-            limit = Number(req.query.limit);
-            skip = (page - 1) * limit;
-            query = query.skip(skip).limit(limit)
-        }
-
-
+        let query =  place.find(req.query)
         const places = await query
-
-        res.status(200).json( places)
+        res.status(200).json(places)
     }catch(err){
         res.status(200)
         .json({

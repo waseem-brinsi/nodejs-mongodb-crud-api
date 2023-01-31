@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
-const bcrypt = require('bcryptjs')
+const bcrypt = require('bcrypt')
 const crypto = require('crypto')
 
 const userschema = new mongoose.Schema({
@@ -23,9 +23,8 @@ const userschema = new mongoose.Schema({
     },
     password:{type:String,
         required:[true,'user must have password'],
-        trim:true,
-        lowercase:true,
-        minlength:8,
+        // trim:true,
+        // lowercase:true,
         select:false
     },
     passwordConfirm:{type:String,
@@ -55,11 +54,10 @@ userschema.pre(/^find/,function(next){
     this.find({active:{$ne:false}})
     next()
 });
-
 userschema.pre('save',async function (next){
     if(!this.isModified('password')) return next();
     this.password = await bcrypt.hash(this.password,12)
-
+    console.log(this.password);
     this.passwordConfirm = undefined
     next()
 })
@@ -69,9 +67,8 @@ userschema.pre('save',function(next){
     next();
 })
 userschema.methods.comparPassword = async function(loginpassword,userpassword){
-    return await bcrypt.compare(loginpassword,userpassword)
+    return await bcrypt.compare(loginpassword.toString(),userpassword)
 }
-
 userschema.methods.isPasschanged =  function(tokenIat){
     if (Number(this.changedAt)/1000 > tokenIat){
         return true

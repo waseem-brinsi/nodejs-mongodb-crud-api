@@ -19,9 +19,7 @@ router.patch('/resetcode/:ResetCode',authController.resetCode)
 //update login_user password 
 router.route('/updatePassword')
       .patch(authController.protect,authController.updatePassword)
-
 router.patch('/updateMe',authController.protect,userController.updateMe)
-
 router.delete('/deleteMe',authController.protect,userController.deleteMe)
 
 
