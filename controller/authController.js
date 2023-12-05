@@ -1,4 +1,4 @@
-const user = require('./../models/userModels')
+const User = require('./../models/userModels')
 const jwt = require('jsonwebtoken')
 const sendEmail = require('./../utils/email')
 const crypto = require('crypto')
@@ -17,53 +17,29 @@ const sendToken = function(user,status,res){
     })
 }
 
-exports.login = async function(req,res,next){
-    try{
-        const email = req.body.email
-        const password = req.body.password
-        if(!email || !password ){
-           return res.status(400).json({status:"faild",error:"empty passwor and email"})
-        }
-        console.log("level 1 ");
-       const fuser = await user.findOne({email}).select('+password')
-       console.log("level 2 ");
-       const comparPassword = await fuser.comparPassword(password,fuser.password)
-       console.log("level 3 ");
-       const hashedPass = await bcrypt.hash(password,12)
-       console.log(password+":"+hashedPass+"---"+fuser.password);
-       console.log(comparPassword);
-        if(fuser && comparPassword){
-            console.log("level 4 ");
-            const token = signToken(fuser._id);
-            res.status(200).json({
-                email:fuser.email,
-                token:token,
-                fuser
-            })
-        }
-        else{
-            return res.status(400).json({status:"faild",error:"Incorrect Email or Password"})
-        }
-       }
-       catch(err){
-        console.log(err)
-        return res.status(400).json({status:"faild",error:"unknown error"})
-       }
-}
 
 exports.signup = async (req,res)=>{
     try{
-        const newUser = await user.create(
-            req.body
+        console.log(req.body.name);
+        const newUser = await User.create(
+            {
+                name : req.body.name,
+                email: req.body.email,
+                phone: req.body.phone,
+                password: req.body.password,
+                passwordConfirm : req.body.passwordConfirm
+            }
         )
-
+        console.log(newUser);
         const token = signToken(newUser._id)
+        //response
         res.status(200).json({
             status:"seccuss",
             token:token,
             data:newUser
         })
-    }catch(err){
+    }
+    catch(err){
         res.status(400).json(
             {
                 status:"faild",
@@ -73,44 +49,72 @@ exports.signup = async (req,res)=>{
     }
 }
 
+exports.login = async function(req,res,next){
+    try{
+        const LoginEmail = req.body.email
+        const LoginPassword = req.body.password
+        // 1- check if the email and password exist
+        if(!LoginEmail || !LoginPassword ){
+           return res.status(400).json({status:"faild",error:"empty passwor and email"})
+        }
+        //2- check if user exist & password Correct
+       const FindUser = await User.findOne({email:LoginEmail}).select('+password');
+       const comparPassword = await FindUser.comparPassword(LoginPassword,FindUser.password)
+
+       //3- if ervrything ok send token to the user
+        if(FindUser && comparPassword){
+            console.log("Login seccuss ");
+            const token = signToken(FindUser._id);
+            res.status(200).json({
+                email:FindUser.email,
+                token:token,
+                
+            })
+        }
+        else{
+            console.log("Login Faild ");
+            return res.status(400).json({status:"faild",error:"Incorrect Email or Password"})
+        }
+       }
+       catch(err){
+        console.log(err)
+        return res.status(400).json({status:"faild",error:"unknown error"})
+       }
+}
+
 //check if the user login and have token
 exports.protect = async (req,res,next)=>{
     let token;
     let decode;
     // 1) get token and check if it's there
     try{        
-        if(req.headers && req.headers.authorization.startsWith('name')){
+        if(req.headers && req.headers.authorization.startsWith('Bearer')){
             token = req.headers.authorization.split(' ')[1]
-            console.log(token)
         }
-        if(!token){
-            return next(res.status(400).json({status:"No token"}))
-        }
+        if(!token){return next(res.status(400).json({status:"No token"}))}
     }
-    catch(err){
-        return next(res.status(400).json({status:"faild",error:'No authorization'}))
-    }
+    catch(err){ return next(res.status(400).json({status:"faild",error:'No authorization'}))}
+    
     // 2) verification token:
     try{
         decode = await jwt.verify(token, 'wetcci-secret');
-        console.log(decode);
-    }catch(err){
-        return res.status(400).json({status:"faild",error:err})
     }
+    catch(err){return res.status(400).json({status:"faild",error:err})}
 
-    // 3) check if user still exist using token id:
-    const currentUser = await user.findById(decode.id)
+    // 3) check if user exist using token id:
+    const currentUser = await User.findById(decode.id)
     if(!currentUser){
-        return res.status(400).json({status:"faild",error:"decode.id not exist('user not exist') "})
+        return res.status(400).json({status:"faild",error:"user not exist"})
     }
 
     // 4) check if user changed password after the token was issued:
-
     const isPasschanged = currentUser.isPasschanged(decode.iat)
     if(isPasschanged){
-        return res.status(400).json({status:"faild",error:"Password Changed"})
+        return res.status(400).json({status:"faild",error:"Password Changed --- try again with the new PassWord "})
     }
+    console.log(req.user);
     req.user = currentUser
+    console.log(req.user);
 
     next()
 }    
@@ -129,7 +133,7 @@ exports.forgotPassword =async function(req,res,next){
     // 1) get random user based on Post email:
     console.log("Find the email if exist");
     const email = req.body.email
-    const currentuser = await user.findOne({email:email});
+    const currentuser = await User.findOne({email:email});
     console.log(currentuser);
     if(!email){
         res.status(400).json({
@@ -177,7 +181,7 @@ exports.restPassword = async function(req,res,next){
     RestToken = req.params.RestToken
     console.log(RestToken);
     PasswordRestToken = crypto.createHash('sha256').update(RestToken).digest('hex');
-    const currentuser = await user.findOne({
+    const currentuser = await User.findOne({
         PasswordRestToken:PasswordRestToken,
         PasswordRestExpire:{$gt:Date.now()}
     })
@@ -214,7 +218,7 @@ exports.resetCode = async function(req,res,next){
         console.log(ResetCode);
         ResetCode = crypto.createHash('sha256').update(ResetCode).digest('hex');
         console.log(ResetCode);
-        const currentuser = await user.findOne({
+        const currentuser = await User.findOne({
             ResetCode:ResetCode,
             ResetCodeExpire:{$gt:Date.now()}
         })
@@ -250,7 +254,7 @@ exports.resetCode = async function(req,res,next){
 
 exports.updatePassword = async function(req,res,next){
     // 1) get user from collection
-    const currentUser = await user.findById(req.user.id).select('+password')
+    const currentUser = await User.findById(req.user.id).select('+password')
     // console.log(currentUser);
     // 2) check if the current password is correct:
     console.log(req.body.currentPassword);

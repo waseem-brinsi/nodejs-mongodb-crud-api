@@ -1,7 +1,9 @@
 const express = require("express");
 const app = express();
+const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const multer = require('multer');
+
 
 const hotelRoute = require('./routes/hotelRoutes');
 const placeRoute = require('./routes/placeRoutes');
@@ -12,8 +14,15 @@ app.use((req,res,next)=>{
     console.log('============MiddelWare===========')
     next();
 })
+app.use(express.json());                       //this is the build in express body-parser 
+app.use(express.urlencoded({extended: true,}));                //this mean we don't need to use body-parser anymore
+
+
+
+  
+
 app.use(morgan('dev'));
-app.use(express.json());
+
 app.use("/img",express.static('dev-data/img'))
 
 //=======================================| Upload Image |=================================================================//
@@ -38,8 +47,8 @@ app.post('/api/v1/upload', upload.single('image'), (req, res) => {
 //=====================================================================================================================//
 
 
-app.use('/api/v1/hotels',hotelRoute)
-app.use('/api/v1/places',placeRoute)
-app.use('/api/v1/users',userRoute)
+app.use('/hotels',hotelRoute)
+app.use('/places',placeRoute)
+app.use('/users',userRoute)
 
 module.exports = app

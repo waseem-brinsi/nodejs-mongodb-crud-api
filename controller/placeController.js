@@ -1,21 +1,21 @@
-const place = require('../models/placeModels')
+const Place = require('../models/placeModels')
 
 
 exports.getallplaces = async (req,res)=>{
     try{
-        let query =  place.find(req.query)
-        const places = await query
-        res.status(200).json(places)
+        let query =   Place.find(req.query)
+        const AllPlaces = await query
+        res.status(200).json(AllPlaces)
     }catch(err){
-        res.status(200)
-        .json({
+        res.status(200).json({
             status:"faild",
             error:err
         })}
 }
+
 exports.createplace = async (req,res)=>{
     try{
-        const newplace = await place.create(req.body)
+        const newplace = await Place.create(req.body)
         res.status(200).json(newplace)
     }catch(err){
         res.status(400).json(
@@ -26,9 +26,10 @@ exports.createplace = async (req,res)=>{
         )
     }
 }
+
 exports.getplace = async (req,res)=>{
     try{
-        const findplace =await  place.findById(req.params.id) 
+        const findplace =await  Place.findById(req.params.id) 
         // const findplace =await  place.findOne({_id:req.params.id}) 
         res.status(200).json({
         status:"seccuss",
@@ -43,9 +44,10 @@ exports.getplace = async (req,res)=>{
         )
     }
 }
+
 exports.updateplace = async (req,res)=>{
     try{
-        const updateplace = await place.findByIdAndUpdate(req.params.id,req.body,{
+        const updateplace = await Place.findByIdAndUpdate(req.params.id,req.body,{
                                                                                 new:true,
                                                                                 runValidators:true    })
         res.status(200).json({
@@ -61,9 +63,10 @@ exports.updateplace = async (req,res)=>{
         )
     }
 }
+
 exports.deleteplace =async (req,res)=>{
     try{
-        await place.findByIdAndDelete(req.params.id)
+        await Place.findByIdAndDelete(req.params.id)
         res.status(200).json({
             status:"seccuss",
             data:null

@@ -18,7 +18,7 @@ const placeschema = new mongoose.Schema({
     },
     image:{
         type:String,
-        required:[true,'a place must have description']
+        required:[false,'a place must have description']
     }
 });
 place = mongoose.model('place',placeschema)

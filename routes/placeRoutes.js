@@ -1,5 +1,5 @@
 const express = require('express');
-const  app = express();
+
 
 const placeController = require('../controller/placeController');
 const authController = require('../controller/authController');
@@ -10,7 +10,7 @@ const router = express.Router();
 router
     .route('/')
     .get(authController.protect,placeController.getallplaces)
-    .post(placeController.createplace)
+    .post(authController.protect,placeController.createplace)
 router
     .route('/:id')
     .get(placeController.getplace)

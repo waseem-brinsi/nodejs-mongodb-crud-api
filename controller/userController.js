@@ -10,6 +10,7 @@ const filterObj = function(obj,...allowedFields){
     return newObject
 }
 
+
 exports.getalluser = async (req,res)=>{
     try{
         param =req.query
